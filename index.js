@@ -8,6 +8,14 @@ require('dotenv').config()
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = process.env.MONGODB_URI;
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+app.use((req, res, next) => {
+    const start = Date.now();
+    res.on('finish', () => {
+        const duration = Date.now() - start;
+        console.log(`[${new Date().toISOString()}] ${req.method} ${req.url} ${res.statusCode} - ${duration}ms`);
+    });
+    next();
+});
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -32,6 +40,7 @@ async function run() {
         })
 
         app.get('/allrooms', async (req, res) => {
+            console.log("ok");
             const result = await roomsCollection.find().toArray();
             res.json(result);
         });
