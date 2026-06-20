@@ -1,8 +1,12 @@
 const express = require('express')
+const cors = require('cors')
+require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 8000
 
-require('dotenv').config()
+app.use(express.json())
+app.use(cors())
+
 
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
@@ -40,9 +44,23 @@ async function run() {
         })
 
         app.get('/allrooms', async (req, res) => {
-            console.log("ok");
             const result = await roomsCollection.find().toArray();
             res.json(result);
+        });
+        app.post("/allrooms", async (req, res) => {
+            const roomData = req.body;
+            const result = await roomsCollection.insertOne(roomData);
+
+            res.json(result);
+        });
+        app.get("/rooms/my-rooms/:userId", async (req, res) => {
+            const userId = req.params.userId;
+            const query={ createdBy: userId }
+            const rooms = await roomsCollection
+                .find(query)
+                .toArray();
+
+            res.json({ rooms });
         });
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
