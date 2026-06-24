@@ -5,6 +5,7 @@ const app = express()
 const port = process.env.PORT || 8000
 const { ObjectId } = require("mongodb");
 
+
 app.use(express.json())
 app.use(cors())
 
@@ -29,13 +30,15 @@ const client = new MongoClient(uri, {
     }
 });
 
+
+
 async function run() {
     try {
         await client.connect();
 
         const database = client.db("librarydb");
-        const roomsCollection = database.collection("users"); // আপনার রিকোয়ারমেন্ট অনুযায়ী এটি "users"-ই থাকলো
-        const bookingsCollection = database.collection("bookings"); // বুকিং ট্র্যাক করার আলাদা কালেকশন
+        const roomsCollection = database.collection("users"); 
+        const bookingsCollection = database.collection("bookings"); 
 
         // ----------------------------------------------------------------
         // ROOMS API ENDPOINTS
@@ -45,7 +48,7 @@ async function run() {
             res.json(result)
         })
 
-        // আপনার ব্যাকএন্ডের এই রাউটটি পরিবর্তন করুন
+       
         app.get('/allrooms', async (req, res) => {
             try {
                 const { search, amenities } = req.query;
