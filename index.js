@@ -54,15 +54,13 @@ async function run() {
                 const { search, amenities } = req.query;
                 let query = {};
 
-                // ১. রুমের নাম দিয়ে সার্চ করার লজিক (Case-insensitive)
                 if (search) {
                     query.name = { $regex: search, $options: "i" };
                 }
 
-                // ২. অ্যামেনিটিজ ফিল্টার লজিক
                 if (amenities) {
                     const amenitiesArray = amenities.split(",");
-                    query.amenities = { $all: amenitiesArray }; // সবকটি সিলেক্টেড অ্যামেনিটিজ থাকতে হবে
+                    query.amenities = { $all: amenitiesArray }; 
                 }
 
                 const result = await roomsCollection.find(query).toArray();
@@ -83,19 +81,18 @@ async function run() {
             const result = await roomsCollection.deleteOne({ _id: new ObjectId(id) });
             res.json(result);
         });
-        // ---- এই কোডটুকু হুবহু ব্যাকএন্ড ফাইলে বসিয়ে দিন ----
         app.patch("/allrooms/:id", async (req, res) => {
             try {
                 const id = req.params.id;
                 const { userId, ...updatedFields } = req.body;
 
-                // ১. ডাটাবেজ থেকে রুমটি খুঁজে বের করা
+             
                 const room = await roomsCollection.findOne({ _id: new ObjectId(id) });
                 if (!room) {
                     return res.status(404).json({ error: "Room not found" });
                 }
 
-                // ২. চেক করা যে ইউজার আপডেট করতে চাচ্ছে সে-ই এই রুমের মালিক কিনা
+              
                 if (room.createdBy !== userId) {
                     return res.status(403).json({ error: "Unauthorized: Only the owner can update this room" });
                 }
