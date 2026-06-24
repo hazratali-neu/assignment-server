@@ -97,12 +97,11 @@ async function run() {
                     return res.status(403).json({ error: "Unauthorized: Only the owner can update this room" });
                 }
 
-                // ৩. সংখ্যার ফিল্ডগুলোকে নাম্বার ফরম্যাটে কনভার্ট করা
                 if (updatedFields.capacity !== undefined) updatedFields.capacity = Number(updatedFields.capacity);
                 if (updatedFields.hourlyRate !== undefined) updatedFields.hourlyRate = Number(updatedFields.hourlyRate);
                 if (updatedFields.totalSlot !== undefined) updatedFields.totalSlot = Number(updatedFields.totalSlot);
 
-                // ৪. ডাটাবেজে শুধুমাত্র পরিবর্তন করা তথ্যগুলো আপডেট করা
+          
                 const result = await roomsCollection.updateOne(
                     { _id: new ObjectId(id) },
                     { $set: updatedFields }
@@ -126,14 +125,13 @@ async function run() {
             const room = await roomsCollection.findOne({ _id: new ObjectId(id) });
             res.json(room);
         });
-        // ----------------------------------------------------------------
-        // GET USER BOOKINGS WITH ROOM DETAILS
-        // ----------------------------------------------------------------
+  
+
         app.get("/my-bookings/:userId", async (req, res) => {
             try {
                 const userId = req.params.userId;
 
-                // ১. ওই ইউজারের সব বুকিং ডাটাবেজ থেকে খুঁজে বের করা
+              
                 const bookings = await database.collection("bookings")
                     .find({ userId: userId })
                     .sort({ createdAt: -1 })
