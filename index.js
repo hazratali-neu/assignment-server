@@ -137,12 +137,12 @@ async function run() {
                     .sort({ createdAt: -1 })
                     .toArray();
 
-                // ২. প্রতিটি বুকিংয়ের সাথে রুমের নাম এবং ইমেজ যুক্ত (Populate) করা
+               
                 const populatedBookings = await Promise.all(
                     bookings.map(async (booking) => {
                         let roomInfo = null;
                         try {
-                            // আপনার রিকোয়ারমেন্ট অনুযায়ী রুমগুলো "users" কালেকশনে আছে
+                           
                             roomInfo = await database.collection("users").findOne({
                                 _id: new ObjectId(booking.roomId)
                             });
@@ -164,9 +164,7 @@ async function run() {
             }
         });
 
-        // ----------------------------------------------------------------
-        // CANCEL BOOKING ENDPOINT
-        // ----------------------------------------------------------------
+
         app.patch("/bookings/cancel/:id", async (req, res) => {
             try {
                 const bookingId = req.params.id;
@@ -185,9 +183,7 @@ async function run() {
                 res.status(500).json({ error: err.message });
             }
         });
-        // ----------------------------------------------------------------
-        // BOOKING CONFIRMATION API (With Advanced Conflict Check)
-        // ----------------------------------------------------------------
+
         app.post("/bookings", async (req, res) => {
             try {
                 const { roomId, userId, date, startTime, endTime, totalCost, specialNote } = req.body;
@@ -195,28 +191,26 @@ async function run() {
                 if (!roomId || !userId || !date || !startTime || !endTime) {
                     return res.status(400).json({ error: "Missing required booking details." });
                 }
-
-                // স্ট্রিং টাইমকে ক্যালকুলেশনের সুবিধার জন্য ইন্টিজারে রূপান্তর (e.g., "08:00" -> 8)
                 const newStart = parseInt(startTime.split(":")[0]);
                 const newEnd = parseInt(endTime.split(":")[0]);
 
-                // ওভারল্যাপিং কনফ্লিক্ট চেক অ্যালগরিদম
+               
                 const conflictBooking = await bookingsCollection.findOne({
                     roomId: roomId,
                     date: date,
                     $or: [
                         {
-                            // কন্ডিশন ১: পুরাতন বুকিং চলাকালীন নতুন বুকিং শুরু হলে
+                           
                             startHour: { $lte: newStart },
                             endHour: { $gt: newStart }
                         },
                         {
-                            // কন্ডিশন ২: পুরাতন বুকিং শেষ হওয়ার আগে নতুন বুকিং শেষ হলে
+               
                             startHour: { $lt: newEnd },
                             endHour: { $gte: newEnd }
                         },
                         {
-                            // কন্ডিশন ৩: নতুন বুকিং পুরাতন স্লটকে সম্পূর্ণ ওভারল্যাপ করলে
+                         
                             startHour: { $gte: newStart },
                             endHour: { $lte: newEnd }
                         }
@@ -228,8 +222,6 @@ async function run() {
                         error: "This time slot is already booked for the selected date. Please choose another time!"
                     });
                 }
-
-                // নতুন বুকিং অবজেক্ট ডকুমেন্ট
                 const bookingDoc = {
                     roomId,
                     userId,
@@ -243,10 +235,9 @@ async function run() {
                     createdAt: new Date()
                 };
 
-                // ১. বুকিং কালেকশনে ডাটা ইনসার্ট
                 const bookingResult = await bookingsCollection.insertOne(bookingDoc);
 
-                // ২. রুমের (যা users কালেকশনে আছে) bookingCount ১ বাড়িয়ে দেওয়া
+             
                 await roomsCollection.updateOne(
                     { _id: new ObjectId(roomId) },
                     { $inc: { bookingCount: 1 } }
@@ -263,7 +254,6 @@ async function run() {
             }
         });
 
-        // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } catch (err) {
@@ -272,9 +262,9 @@ async function run() {
 }
 run().catch(console.dir);
 
-// app.get('/', (req, res) => {
-//     res.send('Hello World!')
-// })
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
